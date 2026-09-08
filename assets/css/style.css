@@ -412,7 +412,7 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height
 .kpi-label { color: var(--text-2); font-size: 0.82rem; }
 .kpi-trend { font-size:0.76rem; margin-top:4px; }
 .kpi-trend.up { color: var(--aurora-mint);} .kpi-trend.down{ color: var(--aurora-rose);}
-.panel { padding: var(--space-6); margin-bottom: var(--space-6); }
+.panel { padding: var(--space-6); margin-bottom: var(--space-6); overflow-x: auto; }
 .panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-5); }
 .data-table { width:100%; border-collapse: collapse; font-size: 0.88rem; }
 .data-table th { text-align:left; color: var(--text-2); font-weight:600; font-size:0.76rem; text-transform:uppercase; letter-spacing:.06em; padding: 10px 12px; border-bottom: 1px solid var(--glass-border); }
@@ -431,10 +431,32 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height
 @media (max-width: 980px) {
   .dash-shell { grid-template-columns: 1fr; }
   #mobile-sidebar-btn { display: inline-flex; }
-  .dash-sidebar { position:fixed; left:0; top: var(--header-h); bottom:0; width:260px; z-index: 460; transform: translateX(-105%); transition: transform var(--dur-mid) var(--ease-out); height: calc(100vh - var(--header-h)); }
+  .dash-sidebar {
+    position:fixed; left:0; top: var(--header-h); bottom:0; width:min(280px, 82vw); z-index: 470;
+    transform: translateX(-105%); transition: transform var(--dur-mid) var(--ease-out);
+    height: calc(100vh - var(--header-h)); overflow-y: auto;
+    /* Solid, not translucent — on mobile this sits ON TOP of dashboard
+       content as an overlay, so it must fully hide what's behind it
+       (the glass effect above is only legible on desktop, where the
+       sidebar sits beside content rather than over it). */
+    background: var(--bg-1);
+    box-shadow: 10px 0 40px rgba(0,0,0,0.4);
+  }
   .dash-sidebar.open { transform: translateX(0); }
+  .sidebar-backdrop {
+    display:none; position:fixed; inset: var(--header-h) 0 0 0; z-index: 465;
+    background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+  }
+  .sidebar-backdrop.open { display: block; }
   .dash-main { padding: var(--space-5) var(--space-4); padding-top: calc(var(--header-h) + var(--space-4)); }
   .kpi-grid, .cards-row, .categories-grid, .stats-grid { grid-template-columns: repeat(2,1fr); }
+}
+@media (max-width: 700px) {
+  /* The two-column chat layout can't fit on a phone screen — stack the
+     thread list above the conversation instead of squeezing both into
+     a 300px + remainder grid that leaves the panel unreadably narrow. */
+  .chat-shell { grid-template-columns: 1fr; grid-template-rows: 220px 1fr; height: calc(100vh - var(--header-h) - 32px); }
+  .chat-list { border-right:none; border-bottom:1px solid var(--glass-border); }
 }
 @media (max-width: 560px) {
   .kpi-grid, .cards-row, .categories-grid, .stats-grid, .footer-grid { grid-template-columns: 1fr; }

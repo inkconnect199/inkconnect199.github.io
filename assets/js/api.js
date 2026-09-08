@@ -10,7 +10,7 @@
 const API_CONFIG = {
   // Paste your deployed Google Apps Script Web App URL here, e.g.
   // "https://script.google.com/macros/s/AKfycb.../exec"
-  GAS_URL: "https://script.google.com/macros/s/AKfycbwq4lkWvs0UasYUfq4iy4KMCC32uOEQSN7KJwWeNHkmO1kHUGMO3B_3uUMGoxc6RVk2nw/exec",
+  GAS_URL: "",
 };
 
 const DB_KEY = "inkconnect_db_v1";
@@ -30,9 +30,9 @@ const SITE_CONFIG = {
   COMPANY_PAYPAL_EMAIL: "inkconnect.payments@gmail.com",
   COMPANY_NAME: "InkConnect",
   // Set to false to let clients skip the fee gate entirely (e.g. for local testing).
-  REQUIRE_CLIENT_ACCESS_FEE: true,
+  REQUIRE_CLIENT_ACCESS_FEE: false,
   // Writers pay the same one-time access fee before their dashboard unlocks too.
-  REQUIRE_WRITER_ACCESS_FEE: true,
+  REQUIRE_WRITER_ACCESS_FEE: false,
   // Set to false to let clients post jobs directly without admin approval.
   REQUIRE_ADMIN_JOB_APPROVAL: true,
   // Referral program: existing users earn this bonus when someone they
@@ -545,6 +545,35 @@ const LocalAPI = {
     return { ok: true };
   },
 
+  /** Admin: create a brand-new admin account directly — no registration
+      flow, no access fee, active immediately. Only reachable from inside
+      the Admin Dashboard, which already requires being signed in as an
+      existing admin. */
+  adminCreateAdmin(db, p) {
+    const emailTaken = db.allUsers.find((u) => u.email.toLowerCase() === p.email.toLowerCase());
+    if (emailTaken) return { ok: false, error: "An account with this email already exists." };
+    const user = {
+      id: LocalDB.uid("usr"), fullName: p.fullName, username: p.email.split("@")[0], email: p.email,
+      phone: "", country: "", role: "admin", passwordHash: p.passwordHash, profilePic: "",
+      bio: "", createdAt: Date.now(), verified: true, suspended: false, accessStatus: "active",
+      referralCode: generateReferralCode(db, p.fullName), referredBy: null,
+    };
+    db.allUsers.push(user);
+    db.wallets[user.id] = { balance: 0, escrow: 0 };
+    return { ok: true, user: sanitize(user) };
+  },
+
+  /** Admin: promote an existing client/writer account to admin. */
+  adminPromoteToAdmin(db, p) {
+    const u = db.allUsers.find((x) => x.id === p.id);
+    if (!u) return { ok: false, error: "User not found." };
+    if (u.role === "admin") return { ok: false, error: "This account is already an admin." };
+    u.role = "admin";
+    u.accessStatus = "active";
+    pushNotification(db, u.id, "payment", "Your account has been made an administrator.");
+    return { ok: true };
+  },
+
   /** Client: submit proof of the one-time access-fee payment (M-Pesa, PayPal
       or other). Marks the account "pending" until an admin reviews it. */
   submitAccessPayment(db, p) {
@@ -732,6 +761,8 @@ const API = {
   adminGetUsers: () => apiRequest("adminGetUsers"),
   adminGetUserDetail: (payload) => apiRequest("adminGetUserDetail", payload),
   adminSetUserStatus: (payload) => apiRequest("adminSetUserStatus", payload),
+  adminCreateAdmin: (payload) => apiRequest("adminCreateAdmin", payload),
+  adminPromoteToAdmin: (payload) => apiRequest("adminPromoteToAdmin", payload),
   adminStats: () => apiRequest("adminStats"),
   adminApproveJob: (payload) => apiRequest("adminApproveJob", payload),
   adminRejectJob: (payload) => apiRequest("adminRejectJob", payload),

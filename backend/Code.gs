@@ -36,8 +36,8 @@ const SITE_CONFIG = {
   COMPANY_MPESA_NUMBER: "0106012195",
   COMPANY_PAYPAL_EMAIL: "inkconnect.payments@gmail.com",
   COMPANY_NAME: "InkConnect",
-  REQUIRE_CLIENT_ACCESS_FEE: true,
-  REQUIRE_WRITER_ACCESS_FEE: true,
+  REQUIRE_CLIENT_ACCESS_FEE: false,
+  REQUIRE_WRITER_ACCESS_FEE: false,
   REQUIRE_ADMIN_JOB_APPROVAL: true,
   REFERRAL_BONUS_KES: 100,
   REFERRAL_BONUS_USD: 1,
@@ -748,6 +748,35 @@ const Actions = {
   },
 
   adminSetUserStatus(p) { updateRowById(SHEET_NAMES.USERS, "id", p.id, { suspended: !!p.suspended }); return { ok: true }; },
+
+  /** Admin: create a brand-new admin account directly — no registration
+      flow, no access fee, active immediately. */
+  adminCreateAdmin(p) {
+    const users = readRows(SHEET_NAMES.USERS);
+    if (users.find((u) => String(u.email).toLowerCase() === String(p.email).toLowerCase())) {
+      return { ok: false, error: "An account with this email already exists." };
+    }
+    const user = {
+      id: uid("usr"), fullName: p.fullName, username: p.email.split("@")[0], email: p.email,
+      phone: "", country: "", role: "admin", passwordHash: p.passwordHash, profilePic: "",
+      bio: "", skills: "", rate: 0, rating: 0, completedJobs: 0, createdAt: nowMs(),
+      verified: true, suspended: false, accessStatus: "active", accessRejectionReason: "",
+      referralCode: generateReferralCode(users, p.fullName), referredBy: "",
+    };
+    appendRow(SHEET_NAMES.USERS, user);
+    appendRow(SHEET_NAMES.WALLET, { userId: user.id, balance: 0, escrow: 0 });
+    return { ok: true, user: sanitizeUser(user) };
+  },
+
+  /** Admin: promote an existing client/writer account to admin. */
+  adminPromoteToAdmin(p) {
+    const user = readRows(SHEET_NAMES.USERS).find((u) => u.id === p.id);
+    if (!user) return { ok: false, error: "User not found." };
+    if (user.role === "admin") return { ok: false, error: "This account is already an admin." };
+    updateRowById(SHEET_NAMES.USERS, "id", p.id, { role: "admin", accessStatus: "active" });
+    notify(p.id, "payment", "Your account has been made an administrator.");
+    return { ok: true };
+  },
 
   /** Client: submit proof of the one-time access-fee payment (M-Pesa, PayPal
       or other). Marks the account "pending" until an admin reviews it. */

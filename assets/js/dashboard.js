@@ -59,7 +59,25 @@ function initSidebarRouting() {
 function initMobileSidebarToggle() {
   const btn = document.querySelector("[data-sidebar-toggle]");
   const sidebar = document.getElementById("dash-sidebar");
-  if (btn && sidebar) btn.addEventListener("click", () => sidebar.classList.toggle("open"));
+  if (!btn || !sidebar) return;
+
+  // A dim tap-to-close backdrop behind the sidebar on mobile, created
+  // once here rather than hardcoded in every dashboard's HTML.
+  let backdrop = document.querySelector(".sidebar-backdrop");
+  if (!backdrop) {
+    backdrop = document.createElement("div");
+    backdrop.className = "sidebar-backdrop";
+    document.body.appendChild(backdrop);
+  }
+
+  const closeSidebar = () => { sidebar.classList.remove("open"); backdrop.classList.remove("open"); };
+  const openSidebar = () => { sidebar.classList.add("open"); backdrop.classList.add("open"); };
+
+  btn.addEventListener("click", () => (sidebar.classList.contains("open") ? closeSidebar() : openSidebar()));
+  backdrop.addEventListener("click", closeSidebar);
+  // Closing after tapping a nav link makes the drawer feel like it
+  // actually navigated, instead of staying open over the new section.
+  sidebar.querySelectorAll("a").forEach((a) => a.addEventListener("click", closeSidebar));
 }
 
 function populateProfileWidgets(user) {
@@ -638,6 +656,68 @@ const AdminDash = {
     document.getElementById("nav-admin-messages")?.addEventListener("click", () => this.renderMessages());
     document.querySelector('[data-section-link="wallet"]')?.addEventListener("click", () => this.renderWallets());
     document.querySelectorAll("[data-close-modal]").forEach((b) => b.addEventListener("click", () => closeModal(b.dataset.closeModal)));
+    this.wireAddAdmin();
+  },
+
+  wireAddAdmin() {
+    const createForm = document.getElementById("create-admin-form");
+    if (createForm) createForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const name = document.getElementById("new-admin-name").value.trim();
+      const email = document.getElementById("new-admin-email").value.trim();
+      const pass = document.getElementById("new-admin-password").value;
+      const confirm = document.getElementById("new-admin-confirm").value;
+      const nameField = document.getElementById("new-admin-name").closest(".field");
+      const emailField = document.getElementById("new-admin-email").closest(".field");
+      const passField = document.getElementById("new-admin-password").closest(".field");
+      const confirmField = document.getElementById("new-admin-confirm").closest(".field");
+
+      let valid = true;
+      if (!Validate.required(name)) { Validate.showError(nameField, "Enter a full name."); valid = false; } else Validate.clearError(nameField);
+      if (!Validate.email(email)) { Validate.showError(emailField, "Enter a valid email."); valid = false; } else Validate.clearError(emailField);
+      if (!Validate.minLen(pass, 8)) { Validate.showError(passField, "Password must be at least 8 characters."); valid = false; } else Validate.clearError(passField);
+      if (pass !== confirm || !confirm) { Validate.showError(confirmField, "Passwords do not match."); valid = false; } else Validate.clearError(confirmField);
+      if (!valid) return;
+
+      const submitBtn = createForm.querySelector("button[type=submit]");
+      submitBtn.disabled = true; submitBtn.textContent = "Creating...";
+      const passwordHash = await Auth.hash(pass);
+      const res = await API.adminCreateAdmin({ fullName: name, email, passwordHash });
+      submitBtn.disabled = false; submitBtn.textContent = "Create admin account";
+
+      if (res.ok) { toast(`Admin account created for ${name}`, "success"); createForm.reset(); }
+      else toast(res.error, "error");
+    });
+
+    const promoteForm = document.getElementById("promote-admin-form");
+    if (promoteForm) promoteForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("promote-email").value.trim().toLowerCase();
+      const resultEl = document.getElementById("promote-result");
+      if (!Validate.email(email)) return toast("Enter a valid email.", "error");
+
+      const submitBtn = promoteForm.querySelector("button[type=submit]");
+      submitBtn.disabled = true; submitBtn.textContent = "Searching...";
+      const usersRes = await API.adminGetUsers();
+      const match = usersRes.users.find((u) => u.email.toLowerCase() === email);
+      submitBtn.disabled = false; submitBtn.textContent = "Find & promote";
+
+      if (!match) { resultEl.innerHTML = `<p style="color:var(--aurora-rose);font-size:.85rem;">No account found with that email.</p>`; return; }
+      if (match.role === "admin") { resultEl.innerHTML = `<p class="muted" style="font-size:.85rem;">${escapeHtml(match.fullName)} is already an admin.</p>`; return; }
+
+      resultEl.innerHTML = `
+        <div class="glass" style="padding:14px;display:flex;justify-content:space-between;align-items:center;">
+          <div class="flex gap-2"><div class="avatar sm">${initials(match.fullName)}</div>
+            <div><strong>${escapeHtml(match.fullName)}</strong><p class="muted" style="font-size:.78rem;text-transform:capitalize;">${match.role}</p></div>
+          </div>
+          <button class="btn btn-primary btn-sm" id="confirm-promote-btn">Make admin</button>
+        </div>`;
+      document.getElementById("confirm-promote-btn").addEventListener("click", async () => {
+        const r = await API.adminPromoteToAdmin({ id: match.id });
+        if (r.ok) { toast(`${match.fullName} is now an admin`, "success"); resultEl.innerHTML = ""; promoteForm.reset(); }
+        else toast(r.error, "error");
+      });
+    });
   },
 
   /** Every user's wallet balance in one table. */
