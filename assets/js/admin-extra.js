@@ -34,6 +34,7 @@ document.addEventListener("DOMContentLoaded", () => {
       paymentForm.ACCESS_FEE_USD.value = c.ACCESS_FEE_USD;
       paymentForm.COMPANY_MPESA_NUMBER.value = c.COMPANY_MPESA_NUMBER;
       paymentForm.COMPANY_PAYPAL_EMAIL.value = c.COMPANY_PAYPAL_EMAIL;
+      paymentForm.COMPANY_PAYMENT_LINK.value = c.COMPANY_PAYMENT_LINK || "";
     });
 
     paymentForm.addEventListener("submit", async (e) => {
@@ -43,8 +44,10 @@ document.addEventListener("DOMContentLoaded", () => {
         ACCESS_FEE_USD: Number(paymentForm.ACCESS_FEE_USD.value),
         COMPANY_MPESA_NUMBER: paymentForm.COMPANY_MPESA_NUMBER.value.trim(),
         COMPANY_PAYPAL_EMAIL: paymentForm.COMPANY_PAYPAL_EMAIL.value.trim(),
+        COMPANY_PAYMENT_LINK: paymentForm.COMPANY_PAYMENT_LINK.value.trim(),
       };
       if (!Validate.email(updates.COMPANY_PAYPAL_EMAIL)) return toast("Enter a valid PayPal email.", "error");
+      if (updates.COMPANY_PAYMENT_LINK && !/^https?:\/\//.test(updates.COMPANY_PAYMENT_LINK)) return toast("Payment link must start with http:// or https://", "error");
       const res = await API.updateSiteSettings({ updates });
       if (res.ok) { await getEffectiveSiteConfig(true); toast("Payment details updated — live immediately.", "success"); }
       else toast(res.error, "error");

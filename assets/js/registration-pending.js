@@ -69,6 +69,7 @@ async function renderPaymentForm(content, user) {
           <div class="muted" style="font-size:.78rem;margin-top:2px;">Send as Friends &amp; Family</div>
         </div>
       </div>
+      ${c.COMPANY_PAYMENT_LINK ? `<a href="${escapeHtml(c.COMPANY_PAYMENT_LINK)}" target="_blank" rel="noopener" class="glass" style="display:block;padding:14px;text-align:center;font-weight:600;color:var(--aurora-3);margin-bottom: var(--space-5);">🔗 Or pay via our payment link</a>` : ""}
 
       <form id="review-payment-form" novalidate>
         <div class="method-grid" id="review-methods">
