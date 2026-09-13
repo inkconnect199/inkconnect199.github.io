@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   initSidebarRouting();
   initMobileSidebarToggle();
   populateProfileWidgets(CURRENT_SESSION.user);
+  populateFollowUsLink();
 
   // Clients and writers must clear the access-fee gate before their
   // dashboard initializes. If not yet approved, send them to the
@@ -85,6 +86,18 @@ function populateProfileWidgets(user) {
   document.querySelectorAll("[data-current-user-role]").forEach((el) => (el.textContent = user.role));
   document.querySelectorAll("[data-current-user-avatar]").forEach((el) => (el.textContent = initials(user.fullName)));
   document.querySelectorAll("[data-current-user-email]").forEach((el) => (el.textContent = user.email));
+}
+
+/** Shows the small "Follow us" sidebar link (client/writer dashboards)
+    when the admin has set a social/Linktree link in Site Settings. */
+async function populateFollowUsLink() {
+  const note = document.getElementById("sidebar-follow-us");
+  if (!note) return;
+  const c = await getEffectiveSiteConfig();
+  if (c.COMPANY_SOCIAL_LINK) {
+    document.getElementById("sidebar-follow-us-link").href = c.COMPANY_SOCIAL_LINK;
+    note.style.display = "block";
+  }
 }
 
 /* ============================================================

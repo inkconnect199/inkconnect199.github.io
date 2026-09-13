@@ -143,7 +143,8 @@ async function renderPaymentForm(content, user) {
   });
 }
 
-function renderPending(content, user) {
+async function renderPending(content, user) {
+  const c = await getEffectiveSiteConfig();
   content.innerHTML = `
     <div class="glass form-card text-center">
       <div class="tx-check" style="background:rgba(251,191,36,.15);color:var(--aurora-amber);margin:0 auto 16px;">⏳</div>
@@ -151,6 +152,7 @@ function renderPending(content, user) {
       <p class="body-md mt-2">Thanks — we've received your payment confirmation. An admin will verify it shortly and your dashboard will unlock automatically. You'll get a notification the moment it's approved.</p>
       <p class="muted mt-3" style="font-size:.78rem;" id="review-poll-status">Checking for approval every few seconds…</p>
       <button class="btn btn-outline btn-block mt-3" id="review-refresh-btn">Check approval status now</button>
+      ${c.COMPANY_SOCIAL_LINK ? `<p class="text-center mt-3"><a href="${escapeHtml(c.COMPANY_SOCIAL_LINK)}" target="_blank" rel="noopener" style="font-size:.85rem;color:var(--aurora-3);font-weight:600;">🔗 While you wait, follow us on all our platforms</a></p>` : ""}
       <p class="text-center mt-3"><a href="#" data-logout style="font-size:.82rem;color:var(--text-2);">Log out</a></p>
     </div>`;
   wireLogout(content);
