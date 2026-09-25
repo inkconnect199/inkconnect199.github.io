@@ -10,7 +10,7 @@
 const API_CONFIG = {
   // Paste your deployed Google Apps Script Web App URL here, e.g.
   // "https://script.google.com/macros/s/AKfycb.../exec"
-  GAS_URL: "https://script.google.com/macros/s/AKfycbyxxDG7tBe3ejBNVFYK64W4QtZObGYrFP9awlIqgg4-hkm3yf5TXKuR7AApmIKWHkNY5w/exec",
+  GAS_URL: "",
 };
 
 const DB_KEY = "inkconnect_db_v1";
@@ -28,15 +28,15 @@ const SITE_CONFIG = {
   // Where clients send that fee. Shown on the payment gate screen.
   COMPANY_MPESA_NUMBER: "0106012195",
   COMPANY_PAYPAL_EMAIL: "inkconnect.payments@gmail.com",
-  // Optional: a single external link (Linktree, a payment page, etc.)
-  // shown as an alternative to typing M-Pesa/PayPal details individually.
-  // Leave blank to hide it entirely.
-  COMPANY_PAYMENT_LINK: "",
+  // A single "follow us everywhere" link (Linktree, etc.) — shown in the
+  // footer and on the registration flow. Not a payment method. Leave
+  // blank to hide it entirely.
+  COMPANY_SOCIAL_LINK: "",
   COMPANY_NAME: "InkConnect",
   // Set to false to let clients skip the fee gate entirely (e.g. for local testing).
-  REQUIRE_CLIENT_ACCESS_FEE: true,
+  REQUIRE_CLIENT_ACCESS_FEE: false,
   // Writers pay the same one-time access fee before their dashboard unlocks too.
-  REQUIRE_WRITER_ACCESS_FEE: true,
+  REQUIRE_WRITER_ACCESS_FEE: false,
   // Set to false to let clients post jobs directly without admin approval.
   REQUIRE_ADMIN_JOB_APPROVAL: true,
   // Referral program: existing users earn this bonus when someone they

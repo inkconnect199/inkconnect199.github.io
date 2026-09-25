@@ -27,9 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("fee-amount-label").textContent = `KES ${effectiveConfig.ACCESS_FEE_KES} (~$${effectiveConfig.ACCESS_FEE_USD})`;
     document.getElementById("fee-mpesa-number").textContent = effectiveConfig.COMPANY_MPESA_NUMBER;
     document.getElementById("fee-paypal-email").textContent = effectiveConfig.COMPANY_PAYPAL_EMAIL;
-    if (effectiveConfig.COMPANY_PAYMENT_LINK) {
-      document.getElementById("fee-payment-link").href = effectiveConfig.COMPANY_PAYMENT_LINK;
-      document.getElementById("fee-payment-link-box").style.display = "block";
+    if (effectiveConfig.COMPANY_SOCIAL_LINK) {
+      document.getElementById("follow-us-link").href = effectiveConfig.COMPANY_SOCIAL_LINK;
+      document.getElementById("follow-us-note").style.display = "block";
     }
   })();
   PaymentMethods.wire(document.getElementById("reg-payment-methods"));

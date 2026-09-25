@@ -402,18 +402,18 @@ h1, h2, h3, h4 { font-family: var(--font-display); font-weight: 600; line-height
 .dash-nav a:hover { background: var(--glass-fill-strong); color: var(--text-0); }
 .dash-nav a.active { background: linear-gradient(120deg, rgba(79,124,255,.22), rgba(139,92,246,.22)); color: var(--text-0); border: 1px solid var(--glass-border-strong); }
 .dash-nav .section-label { font-size: 0.68rem; text-transform:uppercase; letter-spacing:0.1em; color: var(--text-3); margin: var(--space-4) 14px 6px; }
-.dash-main { padding: var(--space-6) var(--space-7); }
-.dash-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-6); flex-wrap:wrap; gap: var(--space-3); }
+.dash-main { padding: var(--space-7) var(--space-8); }
+.dash-topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-7); flex-wrap:wrap; gap: var(--space-3); }
 .dash-topbar h1 { font-size: 1.6rem; }
-.kpi-grid { grid-template-columns: repeat(4,1fr); margin-bottom: var(--space-6); }
-.kpi-card { padding: var(--space-5); }
+.kpi-grid { grid-template-columns: repeat(4,1fr); margin-bottom: var(--space-7); gap: var(--space-5); }
+.kpi-card { padding: var(--space-6); }
 .kpi-icon { width:38px;height:38px;border-radius:11px; display:flex;align-items:center;justify-content:center; margin-bottom: var(--space-3); background: rgba(139,92,246,0.15); }
 .kpi-val { font-family: var(--font-mono); font-size: 1.7rem; font-weight:700; }
 .kpi-label { color: var(--text-2); font-size: 0.82rem; }
 .kpi-trend { font-size:0.76rem; margin-top:4px; }
 .kpi-trend.up { color: var(--aurora-mint);} .kpi-trend.down{ color: var(--aurora-rose);}
-.panel { padding: var(--space-6); margin-bottom: var(--space-6); overflow-x: auto; }
-.panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-5); }
+.panel { padding: var(--space-6); margin-bottom: var(--space-7); overflow-x: auto; }
+.panel-head { display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-6); }
 .data-table { width:100%; border-collapse: collapse; font-size: 0.88rem; }
 .data-table th { text-align:left; color: var(--text-2); font-weight:600; font-size:0.76rem; text-transform:uppercase; letter-spacing:.06em; padding: 10px 12px; border-bottom: 1px solid var(--glass-border); }
 .data-table td { padding: 14px 12px; border-bottom: 1px solid var(--glass-border); vertical-align:middle; }

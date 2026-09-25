@@ -60,7 +60,7 @@ const PaymentMethods = {
 
   validate(method, data) {
     if (method === "mpesa") {
-      if (!/^(?:\+254|254|0)7\d{8}$/.test(data.accountRef.replace(/\s+/g, ""))) return "Enter a valid Safaricom M-Pesa number, e.g. 0712345678.";
+      if (!/^(?:\+254|254|0)[17]\d{8}$/.test(data.accountRef.replace(/\s+/g, ""))) return "Enter a valid M-Pesa number, e.g. 0712345678 or 0112345678.";
     } else if (method === "paypal") {
       if (!Validate.email(data.accountRef)) return "Enter a valid PayPal email address.";
     } else if (method === "card") {
